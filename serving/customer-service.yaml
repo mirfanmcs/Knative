@@ -1,0 +1,27 @@
+apiVersion: serving.knative.dev/v1alpha1 
+kind: Service
+metadata:
+  name: customer
+  namespace: default 
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: mirfanmcs/customer
+            env:
+            - name: PORT 
+              value: "8080"
+            readinessProbe:
+              httpGet:
+                path: /health
+              initialDelaySeconds: 5
+              timeoutSeconds: 1
+              periodSeconds: 15
+            livenessProbe:
+              httpGet:
+                path: /health
+              initialDelaySeconds: 15
+              timeoutSeconds: 1
+              periodSeconds: 15
