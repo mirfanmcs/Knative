@@ -1,0 +1,42 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: transaction
+  namespace: default
+spec:
+  runLatest:
+    configuration:
+      build:
+        apiVersion: build.knative.dev/v1alpha1
+        kind: Build
+        spec:
+          serviceAccountName: docker-service-account
+          source:
+            git:
+              url: https://github.com/mirfanmcs/Istio/tree/master/transaction
+              revision: master
+          template:
+            name: kaniko
+            arguments:
+              - name: IMAGE
+                value: docker.io/mirfanmcs/transaction:latest
+      revisionTemplate:
+        spec:
+          container:
+            image: docker.io/mirfanmcs/transaction:latest
+            imagePullPolicy: Always
+            env:
+            - name: PORT 
+              value: "8080"
+            readinessProbe:
+              httpGet:
+                path: /health
+              initialDelaySeconds: 5
+              timeoutSeconds: 1
+              periodSeconds: 15
+            livenessProbe:
+              httpGet:
+                path: /health
+              initialDelaySeconds: 15
+              timeoutSeconds: 1
+              periodSeconds: 15
